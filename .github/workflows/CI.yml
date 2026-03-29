@@ -43,10 +43,12 @@ jobs:
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
           manylinux: 2_28
           before-script: |
-            if command -v yum &> /dev/null; then
+            if [[ "${{ matrix.platform.target }}" == "x86_64" || "${{ matrix.platform.target }}" == "x86" ]]; then
+              if command -v yum &> /dev/null; then
                 yum install -y nasm
-            elif command -v apk &> /dev/null; then
-                apk add nasm
+              elif command -v dnf &> /dev/null; then
+                dnf install -y nasm
+              fi
             fi
       - name: Upload wheels
         uses: actions/upload-artifact@v6
@@ -77,7 +79,10 @@ jobs:
           args: --release --out dist --find-interpreter
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
           manylinux: musllinux_1_2
-          before-script: apk add nasm
+          before-script: |
+            if [[ "${{ matrix.platform.target }}" == "x86_64" || "${{ matrix.platform.target }}" == "x86" ]]; then
+              apk add --no-cache nasm
+            fi
       - name: Upload wheels
         uses: actions/upload-artifact@v6
         with:
@@ -101,7 +106,8 @@ jobs:
         with:
           python-version: 3.13
           architecture: ${{ matrix.platform.python_arch }}
-      - name: Install nasm
+      - name: Install nasm (x64 only)
+        if: matrix.platform.target == 'x64'
         run: |
           choco install nasm
           echo "C:\Program Files\NASM" >> $GITHUB_PATH
