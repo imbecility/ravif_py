@@ -5,6 +5,7 @@ build-backend = "maturin"
 [project]
 name = "ravif_py"
 description = "Fast AVIF encoder for Python based on ravif (Rust)"
+readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Rust",
