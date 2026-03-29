@@ -42,6 +42,12 @@ jobs:
           args: --release --out dist --find-interpreter
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
           manylinux: 2_28
+          before-script: |
+            if command -v yum &> /dev/null; then
+                yum install -y nasm
+            elif command -v apk &> /dev/null; then
+                apk add nasm
+            fi
       - name: Upload wheels
         uses: actions/upload-artifact@v6
         with:
@@ -71,6 +77,7 @@ jobs:
           args: --release --out dist --find-interpreter
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
           manylinux: musllinux_1_2
+          before-script: apk add nasm
       - name: Upload wheels
         uses: actions/upload-artifact@v6
         with:
@@ -94,6 +101,10 @@ jobs:
         with:
           python-version: 3.13
           architecture: ${{ matrix.platform.python_arch }}
+      - name: Install nasm
+        run: |
+          choco install nasm
+          echo "C:\Program Files\NASM" >> $GITHUB_PATH
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -120,6 +131,8 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: 3.x
+      - name: Install nasm
+        run: brew install nasm
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
